@@ -4,9 +4,7 @@
 
 int main(void) {
 
-    init_cpu("./bin/add.bin");
-
-    reset_all();
+    init_cpu(EMU_BIN_PATH);
 
     printf("[difftest] Test Start!\n");
     for(int i = 0; i < 1000000; i++) {
