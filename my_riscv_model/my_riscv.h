@@ -4,12 +4,41 @@
 
 typedef struct
 {
+    uint8_t is_jmp;
+    uint8_t is_branch_taken;
+    uint8_t is_stall;
+    uint8_t is_flush;
+} control_state;
+typedef struct
+{
     uint32_t gpr[32];
     uint32_t pc;
     uint32_t npc;
-} riscv32_CPU_state;
+    uint32_t csr[4];
+    control_state ctrl;
+} cpu_state;
 
-uint32_t mem_read(uint32_t addr);
-void mem_write(uint32_t addr, uint32_t data);
+extern cpu_state cpu;
+typedef struct
+{
+    uint32_t instruction;
+    uint32_t pc;
+    uint32_t snpc;
+    uint32_t valid;
+} ifu_output;
+
+enum
+{
+    R_TYPE = 0,
+    I_TYPE,
+    S_TYPE,
+    B_TYPE,
+    U_TYPE,
+    J_TYPE,
+    INVALID_TYPE
+};
+
+uint32_t mem_read(uint32_t addr,uint8_t bytes);
+void mem_write(uint32_t addr, uint32_t data,uint8_t bytes);
 
 #endif
