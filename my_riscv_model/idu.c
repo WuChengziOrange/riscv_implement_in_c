@@ -58,6 +58,9 @@ void idu_type_i(cpu_state* pcpu, uint32_t inst)
     idu_reg.rs1 = i_inst.rs1;
     idu_reg.alu_input1 = gpr_read(pcpu, idu_reg.rs1);
     idu_reg.alu_input2 = SIGN_EXTEND(i_inst.imm, 12);
+    uint32_t shamt =
+        i_inst.imm &
+        0x1f;  // only lower 5 bits are valid for shift instructions
     switch (i_inst.funct3) {
         case 0b000:  // ADDI
             idu_reg.alu_op = ADD;
@@ -77,8 +80,29 @@ void idu_type_i(cpu_state* pcpu, uint32_t inst)
         case 0b111:  // ANDI
             idu_reg.alu_op = AND;
             break;
+        case 0b001:  // SLLI
+            idu_reg.alu_op = SLL;
+            idu_reg.alu_input2 = shamt;
+            break;
+        case 0b101:                       // SRLI/SRAI
+            if (i_inst.imm >> 10 == 0) {  // SRLI
+                idu_reg.alu_op = SRL;
+                idu_reg.alu_input2 = shamt;
+            } else if (i_inst.imm >> 10 == 0x01) {  // SRAI
+                idu_reg.alu_op = SRA;
+                idu_reg.alu_input2 = shamt;
+            } else {
+                idu_reg.alu_op = INVALID;
+                panic("Invalid func7 in I instruction 0x%8.8x at PC=0x%8.8x\n",
+                      i_inst.imm >> 5,
+                      idu_reg.pc);
+            }
+            break;
         default:
             idu_reg.alu_op = INVALID;
+            panic("Invalid func3 in I instruction 0x%8.8x at PC=0x%8.8x\n",
+                  i_inst.funct3,
+                  idu_reg.pc);
     }
 }
 
@@ -186,7 +210,7 @@ void idu_type_b(cpu_state* pcpu, uint32_t inst, uint32_t pc)
     idu_reg.alu_input1 = gpr_read(pcpu, idu_reg.rs1);
     idu_reg.alu_input2 = gpr_read(pcpu, idu_reg.rs2);
     uint32_t imm = b_inst.imm12 << 12 | b_inst.imm11 << 11 |
-                  b_inst.imm10_5 << 5 | b_inst.imm4_1 << 1;
+                   b_inst.imm10_5 << 5 | b_inst.imm4_1 << 1;
     imm = SIGN_EXTEND(imm, 13);
     idu_reg.dnpc = (imm + pc) & 0xfffffffe;  // branch target address
 
@@ -224,7 +248,7 @@ void idu_type_u(cpu_state* pcpu, uint32_t inst, uint32_t pc)
     idu_reg.alu_op = ADD;
     if (u_inst.opcode == 0x17) {  // AUIPC
         idu_reg.alu_input1 = pc;
-    } else if(u_inst.opcode != 0x37) {  // LUI
+    } else if (u_inst.opcode != 0x37) {  // LUI
         idu_reg.alu_op = INVALID;
     }
 }
