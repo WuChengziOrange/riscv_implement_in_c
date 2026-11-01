@@ -185,11 +185,10 @@ void idu_type_b(cpu_state* pcpu, uint32_t inst, uint32_t pc)
 
     idu_reg.alu_input1 = gpr_read(pcpu, idu_reg.rs1);
     idu_reg.alu_input2 = gpr_read(pcpu, idu_reg.rs2);
-    idu_reg.dnpc = (((b_inst.imm12 << 12) | (b_inst.imm11 << 11) |
-                     (b_inst.imm10_5 << 5) | (b_inst.imm4_1 << 1)) +
-                    pc) &
-                   0xfffffffe;  // branch target address
-    idu_reg.alu_input2 = SIGN_EXTEND(idu_reg.alu_input2, 12);
+    uint32_t imm = b_inst.imm12 << 12 | b_inst.imm11 << 11 |
+                  b_inst.imm10_5 << 5 | b_inst.imm4_1 << 1;
+    imm = SIGN_EXTEND(imm, 13);
+    idu_reg.dnpc = (imm + pc) & 0xfffffffe;  // branch target address
 
     switch (b_inst.funct3) {
         case 0b000:  // BEQ
@@ -225,7 +224,7 @@ void idu_type_u(cpu_state* pcpu, uint32_t inst, uint32_t pc)
     idu_reg.alu_op = ADD;
     if (u_inst.opcode == 0x17) {  // AUIPC
         idu_reg.alu_input1 = pc;
-    } else {
+    } else if(u_inst.opcode != 0x37) {  // LUI
         idu_reg.alu_op = INVALID;
     }
 }
@@ -295,7 +294,7 @@ idu_output id_comb(cpu_state* pcpu, ifu_output ifu)
     idu_reg.pc = ifu.pc;
     idu_reg.snpc = ifu.snpc;
     idu_reg.valid = ifu.valid;
-    if(idu_reg.valid == 0) {
+    if (idu_reg.valid == 0) {
         return idu_reg;
     }
     inst_type_check(pcpu, ifu.instruction, ifu.pc);

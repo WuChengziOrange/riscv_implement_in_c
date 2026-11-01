@@ -150,9 +150,9 @@ wbu_output my_riscv_one_cycle()
             if (ex_out.rd == id_out.rs2) {
                 if (id_out.is_store) {
                     /* store instruction, the data to store is in mem_data */
-                    id_out.mem_data = mem_out.rd_val;
+                    id_out.mem_data = ex_out.rd_val;
                 } else {
-                    id_out.alu_input2 = mem_out.rd_val;
+                    id_out.alu_input2 = ex_out.rd_val;
                 }
             }
         }
