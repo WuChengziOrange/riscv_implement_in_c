@@ -31,8 +31,19 @@ enum
     J_TYPE,
     INVALID_TYPE
 };
+typedef struct
+{
+    uint32_t wb_have_inst;
+    uint32_t wb_pc;
+    uint32_t wb_reg;
+    uint32_t wb_value;
+    uint32_t wb_ena;
+} wbu_output;
 
 uint32_t mem_read(uint32_t addr, uint8_t bytes);
 void mem_write(uint32_t addr, uint32_t data, uint8_t bytes);
 uint32_t gpr_read(cpu_state* pcpu, uint32_t r);
+void init_my_riscv(const char* fname);
+wbu_output my_riscv_one_cycle();
+
 #endif

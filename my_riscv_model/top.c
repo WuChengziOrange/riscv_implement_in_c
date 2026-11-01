@@ -170,3 +170,10 @@ wbu_output my_riscv_one_cycle()
 
     return wb_out;
 }
+
+void init_my_riscv(const char* fname)
+{
+    cpu.snpc = 0;
+
+    mem_init(fname);
+}
