@@ -15,6 +15,7 @@ mem_output mem_comb(cpu_state* pcpu, exu_output exu_out)
     mem_reg.valid = exu_out.valid;
     mem_reg.rd = exu_out.rd;
     mem_reg.is_load = exu_out.is_load;
+    mem_reg.rd_val = exu_out.rd_val;  // default value, for non-load instruction
     if (!mem_reg.valid) {
         return mem_reg;
     }
