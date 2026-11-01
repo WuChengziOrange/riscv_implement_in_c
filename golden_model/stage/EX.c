@@ -12,7 +12,7 @@ extern void print_reg_state();
 
 int ecall_checker()
 {  // check the testpoint
-    printf("\r\nbin: %s\r\n",get_bin_name());
+    color_print("\r\ngolden bin: %s\r\n",get_bin_name());
     if(cpu.gpr[10] == 0) {
         printf("Test Point Pass!\n");
         return 0;

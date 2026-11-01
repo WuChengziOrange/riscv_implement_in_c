@@ -33,10 +33,13 @@ exu_output ex_comb(cpu_state* pcpu, idu_output idu_out)
     exu_reg.reg_write_en = idu_out.reg_write_en;
     exu_reg.mem_data = idu_out.mem_data;
     exu_reg.is_load = idu_out.is_load;
+    uint32_t snpc_dnpc_neq = idu_out.snpc != idu_out.dnpc;
     if (!exu_reg.valid) {
         /* not valid quick return */
         return exu_reg;
     }
+    color_print("\r\nMyRisc EX: 0x%8.8x at PC=0x%8.8x", idu_out._inst, exu_reg.pc);
+
     switch (idu_out.alu_op) {
         case ADD:
             exu_reg.rd_val = idu_out.alu_input1 + idu_out.alu_input2;
@@ -80,29 +83,30 @@ exu_output ex_comb(cpu_state* pcpu, idu_output idu_out)
             exu_reg.dnpc = (idu_out.alu_input1 + idu_out.alu_input2) &
                            0xfffffffe;  // jump address calculation
             exu_reg.rd_val = idu_out.snpc;
-            exu_reg.jump_taken = 1;
+            exu_reg.jump_taken = exu_reg.dnpc != idu_out.snpc;  // if jump taken, dnpc != snpc
             break;
         case ECALL:  // TODO: ECALL handling
             color_print("ECALL at PC = 0x%8.8x, Stop now.\n", idu_out.pc);
-            exit(_ecall_checker(pcpu));
+            // exit(_ecall_checker(pcpu));
+            exu_reg.valid =0; // just for test, pipeline will go on
             break;
         case BEQ:
-            exu_reg.jump_taken = (idu_out.alu_input1 == idu_out.alu_input2);
+            exu_reg.jump_taken = (idu_out.alu_input1 == idu_out.alu_input2)&&(snpc_dnpc_neq);
             break;
         case BNE:
-            exu_reg.jump_taken = (idu_out.alu_input1 != idu_out.alu_input2);
+            exu_reg.jump_taken = (idu_out.alu_input1 != idu_out.alu_input2)&&(snpc_dnpc_neq);
             break;
         case BLT:
-            exu_reg.jump_taken = ((int32_t)idu_out.alu_input1 < (int32_t)idu_out.alu_input2);
+            exu_reg.jump_taken = ((int32_t)idu_out.alu_input1 < (int32_t)idu_out.alu_input2)&&(snpc_dnpc_neq);
             break;
         case BGE:
-            exu_reg.jump_taken = ((int32_t)idu_out.alu_input1 >= (int32_t)idu_out.alu_input2);
+            exu_reg.jump_taken = ((int32_t)idu_out.alu_input1 >= (int32_t)idu_out.alu_input2)&&(snpc_dnpc_neq);
             break;
         case BLTU:
-            exu_reg.jump_taken = (idu_out.alu_input1 < idu_out.alu_input2);
+            exu_reg.jump_taken = (idu_out.alu_input1 < idu_out.alu_input2)&&(snpc_dnpc_neq);
             break;
         case BGEU:
-            exu_reg.jump_taken = (idu_out.alu_input1 >= idu_out.alu_input2);
+            exu_reg.jump_taken = (idu_out.alu_input1 >= idu_out.alu_input2)&&(snpc_dnpc_neq);
             break;
         default:
             panic("Invalid ALU operation %8.8x at PC=%8.8x\n",

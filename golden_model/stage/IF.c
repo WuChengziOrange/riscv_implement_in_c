@@ -1,4 +1,4 @@
-#define DEBUG_ON
+// #define DEBUG_ON
 
 #include <stdio.h>
 #include <cpu.h>
@@ -13,6 +13,7 @@ IF2ID IF(uint32_t npc) {
     cpu.pc = npc;
     Log("\n=====");
     Log("Fetched instruction 0x%8.8x at PC=0x%8.8x", ret.inst, ret.pc);
+    printf("\r\nGolden IF: 0x%8.8x at PC=0x%8.8x", ret.inst, ret.pc);
     cpu.npc = cpu.pc + 4;
     return ret;
 }

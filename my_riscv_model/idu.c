@@ -294,6 +294,8 @@ idu_output id_comb(cpu_state* pcpu, ifu_output ifu)
     idu_reg.pc = ifu.pc;
     idu_reg.snpc = ifu.snpc;
     idu_reg.valid = ifu.valid;
+    idu_reg._inst = ifu.instruction;
+
     if (idu_reg.valid == 0) {
         return idu_reg;
     }

@@ -3,10 +3,18 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-int main(void)
+int main(int argc, char *argv[])
 {
-    init_cpu(EMU_BIN_PATH);
-    init_my_riscv(EMU_BIN_PATH);
+    const char* binpath = EMU_BIN_PATH;
+    if (argc != 2)
+    {
+        fprintf(stderr, "Usage: %s <program-file>\n", argv[0]);
+        fprintf(stderr, "Example: %s riscv_test.bin\n", argv[0]);
+    } else {
+        binpath = argv[1];
+    }
+    init_cpu(binpath);
+    init_my_riscv(binpath);
     WB_info golden = {0};
     wbu_output my_out = {0};
     printf("[difftest] Test Start!\n");
@@ -29,7 +37,7 @@ int main(void)
             (golden.wb_ena == my_out.wb_ena)) {
             continue;
         } else {
-            if(golden.wb_ena == 0 && my_out.wb_ena == 0) {
+            if((golden.wb_ena == 0) && (my_out.wb_ena == 0)) {
                 continue;
             }
             printf("[difftest] Test Failed at PC=0x%8.8x\n", golden.wb_pc);

@@ -101,7 +101,6 @@ typedef struct
 {
     uint32_t pc;
     uint32_t valid;
-    // 1.indicate the destination register number, 2. store data to memory
     uint32_t rd;  // destination register index
     uint32_t rs1;
     uint32_t rs2;
@@ -115,6 +114,7 @@ typedef struct
     uint32_t mem_type;
     uint32_t snpc;
     uint32_t dnpc;
+    uint32_t _inst;  // for debug, the instruction in this stage
 } idu_output;
 
 idu_output id_comb(cpu_state* pcpu, ifu_output ifu);
