@@ -1,6 +1,7 @@
 #ifndef IDU_H
 #define IDU_H
 
+#include "ifu.h"
 #include "stdint.h"
 
 typedef struct
@@ -100,13 +101,21 @@ typedef struct
 {
     uint32_t pc;
     uint32_t valid;
-    uint32_t alu_res; // 1.indicate the destination register number, 2. store data to memory
+    // 1.indicate the destination register number, 2. store data to memory
+    uint32_t rd;  // destination register index
+    uint32_t rs1;
+    uint32_t rs2;
+    uint32_t mem_data;      // data to store to memory
+    uint32_t reg_write_en;  // indicate whether write back to register file
     uint32_t alu_input1;
     uint32_t alu_input2;
     uint32_t alu_op;
+    uint32_t is_load;
     uint32_t mem_type;
     uint32_t snpc;
     uint32_t dnpc;
 } idu_output;
+
+idu_output id_comb(cpu_state* pcpu, ifu_output ifu);
 
 #endif

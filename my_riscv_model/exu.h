@@ -2,6 +2,7 @@
 #define EXU_H
 
 #include "stdint.h"
+#include "idu.h"
 
 typedef struct
 {
@@ -14,7 +15,11 @@ typedef struct
     uint32_t dnpc;
     uint32_t mem_type;
     uint32_t jump_taken;
-
+    uint32_t reg_write_en;
+    uint32_t mem_data;
+    uint32_t is_load;
 } exu_output;
+
+exu_output ex_comb(cpu_state* pcpu, idu_output idu_out);
 
 #endif

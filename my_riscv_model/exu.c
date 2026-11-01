@@ -1,6 +1,5 @@
 #include "exu.h"
 #include "debug.h"
-#include "idu.h"
 #include "my_riscv.h"
 #include "stdint.h"
 #include <stdlib.h>
@@ -17,24 +16,24 @@ int _ecall_checker(cpu_state* pcpu)
         return -1;
     }
 }
-exu_output EXU(cpu_state* pcpu, idu_output idu_out)
+exu_output ex_comb(cpu_state* pcpu, idu_output idu_out)
 {
-    if (pcpu->ctrl.is_stall) {
-        /* stall happend, just return last status,skip update combinational logic */
-        return exu_reg;
-    }
-    /* flip-flop emulator:时钟沿到来，将缓存的寄存器先传给下级 */
-    exu_output ret = exu_reg;
 
     /* 模拟组合逻辑，准备下一拍数据 */
-    exu_reg.rd = idu_out.alu_res;
+    exu_reg.rd = idu_out.rd;
     exu_reg.jump_taken = 0;  // default not jump taken
     exu_reg.dnpc = idu_out.dnpc; // default for branch instruction
     exu_reg.pc = idu_out.pc;
     exu_reg.snpc = idu_out.snpc;
     exu_reg.valid = idu_out.valid;
     exu_reg.alu_op = idu_out.alu_op;
-
+    exu_reg.reg_write_en = idu_out.reg_write_en;
+    exu_reg.mem_data = idu_out.mem_data;
+    exu_reg.is_load = idu_out.is_load;
+    if (!exu_reg.valid) {
+        /* not valid quick return */
+        return exu_reg;
+    }
     switch (idu_out.alu_op) {
         case ADD:
             exu_reg.rd_val = idu_out.alu_input1 + idu_out.alu_input2;
@@ -107,7 +106,6 @@ exu_output EXU(cpu_state* pcpu, idu_output idu_out)
                   idu_out.alu_op,
                   idu_out.pc);
     }
-    pcpu->npc = exu_reg.jump_taken ? exu_reg.dnpc : exu_reg.snpc;  // update npc to next pc, for next instruction fetch
 
-    return ret;
+    return exu_reg;
 }

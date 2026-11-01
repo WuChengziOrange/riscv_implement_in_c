@@ -7,10 +7,11 @@ idu_output idu_reg = {0};
 void idu_type_r(cpu_state* pcpu, uint32_t inst)
 {
     R_type r_inst = *(R_type*)&inst;
-
-    idu_reg.alu_res = r_inst.rd;
-    idu_reg.alu_input1 = pcpu->gpr[r_inst.rs1];
-    idu_reg.alu_input2 = pcpu->gpr[r_inst.rs2];
+    idu_reg.rd = r_inst.rd;
+    idu_reg.rs1 = r_inst.rs1;
+    idu_reg.rs2 = r_inst.rs2;
+    idu_reg.alu_input1 = gpr_read(pcpu, idu_reg.rs1);
+    idu_reg.alu_input2 = gpr_read(pcpu, idu_reg.rs2);
     uint32_t sub_opcode = (r_inst.funct7 << 3) | r_inst.funct3;
     switch (sub_opcode) {
         case 0b0000000000:  // ADD
@@ -52,8 +53,9 @@ void idu_type_i(cpu_state* pcpu, uint32_t inst)
 {
     I_type i_inst = *(I_type*)&inst;
 
-    idu_reg.alu_res = i_inst.rd;
-    idu_reg.alu_input1 = pcpu->gpr[i_inst.rs1];
+    idu_reg.rd = i_inst.rd;
+    idu_reg.rs1 = i_inst.rs1;
+    idu_reg.alu_input1 = gpr_read(pcpu, idu_reg.rs1);
     idu_reg.alu_input2 = i_inst.imm;
     switch (i_inst.funct3) {
         case 0b000:  // ADDI
@@ -82,10 +84,12 @@ void idu_type_i(cpu_state* pcpu, uint32_t inst)
 void idu_type_i_mem(cpu_state* pcpu, uint32_t inst)
 {
     I_type i_inst = *(I_type*)&inst;
-    idu_reg.alu_res = i_inst.rd;
-    idu_reg.alu_input1 = pcpu->gpr[i_inst.rs1];
+    idu_reg.rd = i_inst.rd;
+    idu_reg.rs1 = i_inst.rs1;
+    idu_reg.alu_input1 = gpr_read(pcpu, idu_reg.rs1);
     idu_reg.alu_input2 = i_inst.imm;
     idu_reg.alu_op = ADD_ADDRESS;
+    idu_reg.is_load = 1;
 
     switch (i_inst.funct3) {
         case 0b000:  // LB
@@ -112,8 +116,9 @@ void idu_type_i_jalr(cpu_state* pcpu, uint32_t inst)
 {
     I_type i_inst = *(I_type*)&inst;
 
-    idu_reg.alu_res = i_inst.rd;
-    idu_reg.alu_input1 = pcpu->gpr[i_inst.rs1];
+    idu_reg.rd = i_inst.rd;
+    idu_reg.rs1 = i_inst.rs1;
+    idu_reg.alu_input1 = gpr_read(pcpu, idu_reg.rs1);
     idu_reg.alu_input2 = i_inst.imm;
     if (i_inst.funct3 == 0b000) {  // JALR
         idu_reg.alu_op = ADD_JUMP;
@@ -124,11 +129,16 @@ void idu_type_i_jalr(cpu_state* pcpu, uint32_t inst)
 
 void idu_type_i_fence(cpu_state* pcpu, uint32_t inst)
 {
+    idu_reg.reg_write_en = 0;
+    idu_reg.rd = 0;
+
     panic("no support for FENCE instruction");
 }
 
 void idu_type_i_ecall(cpu_state* pcpu, uint32_t inst)
 {
+    idu_reg.reg_write_en = 0;
+    idu_reg.rd = 0;
     idu_reg.alu_op = ECALL;
     // TODO: ebreak, csr, and other system instructions
 }
@@ -136,9 +146,13 @@ void idu_type_i_ecall(cpu_state* pcpu, uint32_t inst)
 void idu_type_s(cpu_state* pcpu, uint32_t inst)
 {
     S_type s_inst = *(S_type*)&inst;
+    idu_reg.reg_write_en = 0;  // store instruction don't write back
+    idu_reg.rd = 0;
+    idu_reg.rs1 = s_inst.rs1;
+    idu_reg.rs2 = s_inst.rs2;
 
-    idu_reg.alu_res = pcpu->gpr[s_inst.rs2];
-    idu_reg.alu_input1 = pcpu->gpr[s_inst.rs1];
+    idu_reg.mem_data = gpr_read(pcpu, idu_reg.rs2);
+    idu_reg.alu_input1 = gpr_read(pcpu, idu_reg.rs1);
     idu_reg.alu_input2 = (s_inst.imm11_5 << 5) | s_inst.imm4_0;
     idu_reg.alu_op = ADD_ADDRESS;
 
@@ -160,12 +174,17 @@ void idu_type_s(cpu_state* pcpu, uint32_t inst)
 void idu_type_b(cpu_state* pcpu, uint32_t inst, uint32_t pc)
 {
     B_type b_inst = *(B_type*)&inst;
+    idu_reg.reg_write_en = 0;
+    idu_reg.rd = 0;
+    idu_reg.rs1 = b_inst.rs1;
+    idu_reg.rs2 = b_inst.rs2;
 
-    idu_reg.alu_input1 = pcpu->gpr[b_inst.rs1];
-    idu_reg.alu_input2 = pcpu->gpr[b_inst.rs2];
+    idu_reg.alu_input1 = gpr_read(pcpu, idu_reg.rs1);
+    idu_reg.alu_input2 = gpr_read(pcpu, idu_reg.rs2);
     idu_reg.dnpc = (((b_inst.imm12 << 12) | (b_inst.imm11 << 11) |
-                       (b_inst.imm10_5 << 5) | (b_inst.imm4_1 << 1)) +
-                      pc)&0xfffffffe;  // branch target address
+                     (b_inst.imm10_5 << 5) | (b_inst.imm4_1 << 1)) +
+                    pc) &
+                   0xfffffffe;  // branch target address
     switch (b_inst.funct3) {
         case 0b000:  // BEQ
             idu_reg.alu_op = BEQ;
@@ -194,7 +213,7 @@ void idu_type_u(cpu_state* pcpu, uint32_t inst, uint32_t pc)
 {
     U_type u_inst = *(U_type*)&inst;
 
-    idu_reg.alu_res = u_inst.rd;
+    idu_reg.rd = u_inst.rd;
     idu_reg.alu_input1 = 0;  // for LUI, AUIPC, the first input is 0 or PC
     idu_reg.alu_input2 = (u_inst.imm31_12 << 12);
     idu_reg.alu_op = ADD;
@@ -209,7 +228,7 @@ void idu_type_j(cpu_state* pcpu, uint32_t inst, uint32_t pc)
 {
     J_type j_inst = *(J_type*)&inst;
 
-    idu_reg.alu_res = j_inst.rd;
+    idu_reg.rd = j_inst.rd;
     idu_reg.alu_input1 = pc;
     idu_reg.alu_input2 = (j_inst.imm20 << 20) | (j_inst.imm19_12 << 12) |
                          (j_inst.imm11 << 11) | (j_inst.imm10_1 << 1);
@@ -258,18 +277,16 @@ void inst_type_check(cpu_state* pcpu, uint32_t inst, uint32_t pc)
     }
 }
 
-idu_output idu(cpu_state* pcpu, ifu_output ifu)
+idu_output id_comb(cpu_state* pcpu, ifu_output ifu)
 {
-    if (pcpu->ctrl.is_stall) {
-        /* stall happend, just return last status,skip update combinational logic */
-        return idu_reg;
-    }
-    /* flip-flop emulator:时钟沿到来，将缓存的寄存器先传给下级 */
-    idu_output ret = idu_reg;
     /* 模拟组合逻辑，准备下一拍数据 */
+    idu_reg.reg_write_en = 1;  // default 1, most instructions will write back
+    idu_reg.rd = idu_reg.rs1 = idu_reg.rs2 = 0;  // default 0
+    idu_reg.is_load = 0;  // default it's not load instruction
+
     inst_type_check(pcpu, ifu.instruction, ifu.pc);
     idu_reg.pc = ifu.pc;
     idu_reg.snpc = ifu.snpc;
     idu_reg.valid = ifu.valid;
-    return ret;
+    return idu_reg;
 }
