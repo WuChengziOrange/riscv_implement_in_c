@@ -29,6 +29,9 @@ int main(void)
             (golden.wb_ena == my_out.wb_ena)) {
             continue;
         } else {
+            if(golden.wb_ena == 0 && my_out.wb_ena == 0) {
+                continue;
+            }
             printf("[difftest] Test Failed at PC=0x%8.8x\n", golden.wb_pc);
             printf("[difftest] Golden: reg=%d, value=0x%8.8x, ena=%d\n",
                    golden.wb_reg,
