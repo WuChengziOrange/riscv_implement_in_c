@@ -1,7 +1,7 @@
 #include "ifu.h"
 #include "stdint.h"
 
-ifu_output ifu_reg = {0, 0, 0};
+ifu_output ifu_reg = {0};
 
 ifu_output if_comb(cpu_state* pcpu)
 {

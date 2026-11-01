@@ -20,7 +20,7 @@ typedef struct
 
 pipeline_reg regs = {0};
 
-cpu_state cpu = {0, .regs = &regs};
+cpu_state cpu = {.regs = &regs};
 
 void mem_init(const char* fname)
 {

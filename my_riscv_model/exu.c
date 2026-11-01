@@ -4,7 +4,7 @@
 #include "stdint.h"
 #include <stdlib.h>
 
-exu_output exu_reg = {0, 0};
+exu_output exu_reg = {0};
 
 int _ecall_checker(cpu_state* pcpu)
 {  // check the testpoint
