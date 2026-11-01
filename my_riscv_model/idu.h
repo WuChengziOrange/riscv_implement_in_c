@@ -111,6 +111,7 @@ typedef struct
     uint32_t alu_input2;
     uint32_t alu_op;
     uint32_t is_load;
+    uint32_t is_store;
     uint32_t mem_type;
     uint32_t snpc;
     uint32_t dnpc;

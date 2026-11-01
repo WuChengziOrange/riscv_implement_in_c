@@ -8,7 +8,7 @@
 #include "stdint.h"
 #include "wbu.h"
 
-#define MEM_SZ 64000
+#define MEM_SZ 65536
 static uint32_t memory[MEM_SZ / sizeof(uint32_t)];
 typedef struct
 {
@@ -108,13 +108,13 @@ uint32_t gpr_read(cpu_state* pcpu, uint32_t r)
 
 wbu_output my_riscv_one_cycle()
 {
-
     /* 1. combine logic */
     ifu_output if_out = if_comb(&cpu);
     idu_output id_out = id_comb(&cpu, regs.if_id);
     exu_output ex_out = ex_comb(&cpu, regs.id_ex);
     mem_output mem_out = mem_comb(&cpu, regs.ex_mem);
     wbu_output wb_out = wb_comb(&cpu, regs.mem_wb);
+    cpu.ctrl.is_stall = 0;
 
     /*  if | id | ex | mem| wb */
     /*       if | id | ex | mem| wb */
@@ -124,16 +124,20 @@ wbu_output my_riscv_one_cycle()
 
     /* 2. control unit */
     /* forwarding type 1: wb_input to ex_input */
-    if (mem_out.reg_write_en && mem_out.rd) {
+    if (mem_out.reg_write_en && mem_out.rd && mem_out.valid) {
         if (mem_out.rd == id_out.rs1) {
             id_out.alu_input1 = mem_out.rd_val;
         }
         if (mem_out.rd == id_out.rs2) {
-            id_out.alu_input2 = mem_out.rd_val;
+            if (id_out.is_store) {
+                /* store instruction, the data to store is in mem_data */
+                id_out.mem_data = mem_out.rd_val;
+            } else {
+                id_out.alu_input2 = mem_out.rd_val;
+            }
         }
     }
-
-    if (ex_out.rd) {
+    if (ex_out.rd && ex_out.valid) {
         if (ex_out.is_load) {
             /* stall check */
             cpu.ctrl.is_stall =
@@ -144,7 +148,12 @@ wbu_output my_riscv_one_cycle()
                 id_out.alu_input1 = ex_out.rd_val;
             }
             if (ex_out.rd == id_out.rs2) {
-                id_out.alu_input2 = ex_out.rd_val;
+                if (id_out.is_store) {
+                    /* store instruction, the data to store is in mem_data */
+                    id_out.mem_data = mem_out.rd_val;
+                } else {
+                    id_out.alu_input2 = mem_out.rd_val;
+                }
             }
         }
     }
