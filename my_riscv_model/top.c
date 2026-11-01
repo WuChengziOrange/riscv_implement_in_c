@@ -8,6 +8,7 @@
 #include "stdint.h"
 #include "wbu.h"
 
+static const char* bin_name;
 #define MEM_SZ 65536
 static uint32_t memory[MEM_SZ / sizeof(uint32_t)];
 typedef struct
@@ -183,6 +184,10 @@ wbu_output my_riscv_one_cycle()
 void init_my_riscv(const char* fname)
 {
     cpu.snpc = 0;
-
+    bin_name = fname;
     mem_init(fname);
+}
+const char* my_get_bin_name(void)
+{
+    return bin_name;
 }

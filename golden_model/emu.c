@@ -11,7 +11,7 @@ static const char* reg_name[33] = {
     "$0", "ra", "sp", "gp", "tp",  "t0",  "t1", "t2", "s0", "s1", "a0",
     "a1", "a2", "a3", "a4", "a5",  "a6",  "a7", "s2", "s3", "s4", "s5",
     "s6", "s7", "s8", "s9", "s10", "s11", "t3", "t4", "t5", "t6", "this_pc"};
-
+static const char *bin_name;
 riscv32_CPU_state cpu;
 peripheral_descr peripherals[MAX_PERIPHERAL];
 uint32_t num_peripherals = 0;
@@ -92,10 +92,14 @@ void init_memory(const char* fname)
     assert(ret == 1);
     fclose(fp);
 }
-
+const char* get_bin_name(void)
+{
+    return bin_name;
+}
 void init_cpu(const char* fname)
 {
     cpu.npc = 0;
+    bin_name = fname;
     register_peripheral("MONITOR",
                         0x80000000,
                         0x8,

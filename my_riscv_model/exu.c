@@ -5,14 +5,17 @@
 #include <stdlib.h>
 
 exu_output exu_reg = {0};
+const char* my_get_bin_name(void);
 
 int _ecall_checker(cpu_state* pcpu)
 {  // check the testpoint
+    printf("\r\nbin: %s\r\n",my_get_bin_name());
+
     if (pcpu->gpr[10] == 0) {
-        printf("Test Point Pass!\n");
+        printf("my Test Point Pass!\n");
         return 0;
     } else {
-        printf("Test Point Failed\n");
+        printf("my Test Point Failed\n");
         return -1;
     }
 }

@@ -2,12 +2,17 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
+const char* get_bin_name(void);
+
 #define CHECK_A0
 extern riscv32_CPU_state cpu;
 extern void print_reg_state();
 #define ALU_CASE_ENTRY(op, calc) case op: alu_result = (calc); break
 #define BR_CASE_ENTRY(op, calc) case op: br_result = (calc); break
-int ecall_checker() { // check the testpoint
+
+int ecall_checker()
+{  // check the testpoint
+    printf("\r\nbin: %s\r\n",get_bin_name());
     if(cpu.gpr[10] == 0) {
         printf("Test Point Pass!\n");
         return 0;
@@ -34,7 +39,7 @@ EX2MEM EX(ID2EX decode_info) {
     uint32_t src1 = decode_info.src1.value;
     uint32_t src2 = decode_info.src2.value;
     switch(decode_info.alu_op) {
-        case OP_INVALID: 
+        case OP_INVALID:
             panic("Invalid Insturction %8.8x at PC=%8.8x\n", decode_info.inst, decode_info.pc); break;
         case OP_ECALL:
             color_print("ECALL at PC = 0x%8.8x, Stop now.\n", decode_info.pc);
