@@ -26,10 +26,10 @@ SECTIONS
     } > RAM
 
     .bss(NOLOAD) : ALIGN(4) {
-        __bss_start__ = .;
+        __bss_start = .;
         *(.bss .bss.*)
         *(COMMON)
-        __bss_end__ = .;
+        __bss_end = .;
     } > RAM
 
     ASSERT(. <= _stack_top, "firmware size exceeds RAM size");
