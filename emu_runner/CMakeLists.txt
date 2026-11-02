@@ -11,5 +11,6 @@ target_include_directories(emu_runner
 )
 # here can change the bin file
 target_compile_definitions(emu_runner PRIVATE
-    EMU_BIN_PATH="${CMAKE_SOURCE_DIR}/bin/add.bin"
+    # EMU_BIN_PATH="${CMAKE_SOURCE_DIR}/bin/add.bin"
+    EMU_BIN_PATH="${CMAKE_SOURCE_DIR}/source_for_riscv_platform/build/firmware.bin"
 )
