@@ -304,7 +304,10 @@ void inst_type_check(cpu_state* pcpu, uint32_t inst, uint32_t pc)
             idu_type_i_ecall(pcpu, inst);
             break;
         default:  // TODO: unhandled instruction type
-            panic("Invalid Insturction %8.8x at PC=%8.8x\n", inst, pc);
+            idu_reg.alu_op = INVALID;
+            // because of pipeline, we may decode an invalid instruction, and this should be handled in EX stage, so we don't set idu_reg.valid = 0 here
+            // idu_reg.valid = 0;
+            // panic("Invalid Insturction %8.8x at PC=%8.8x\n", inst, pc);
     }
 }
 
