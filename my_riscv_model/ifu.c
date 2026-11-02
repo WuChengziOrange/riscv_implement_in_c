@@ -1,5 +1,5 @@
 #include "ifu.h"
-#include "debug.h"
+#include "peripheral.h"
 #include "stdint.h"
 ifu_output ifu_reg = {0};
 

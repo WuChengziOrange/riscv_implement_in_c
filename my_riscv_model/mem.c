@@ -1,5 +1,5 @@
 #include "mem.h"
-#include "debug.h"
+#include "peripheral.h"
 #include "exu.h"
 #include "idu.h"
 #include "my_riscv.h"
