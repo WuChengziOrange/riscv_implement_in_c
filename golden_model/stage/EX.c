@@ -42,7 +42,7 @@ EX2MEM EX(ID2EX decode_info) {
         case OP_INVALID:
             panic("Invalid Insturction %8.8x at PC=%8.8x\n", decode_info.inst, decode_info.pc); break;
         case OP_ECALL:
-            color_print("ECALL at PC = 0x%8.8x, Stop now.\n", decode_info.pc);
+            color_print("ECALL at PC = 0x%8.8x, Golden Stop now.\n", decode_info.pc);
             //print_reg_state();
 #ifdef CHECK_A0
             exit(ecall_checker());

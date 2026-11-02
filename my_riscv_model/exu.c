@@ -88,7 +88,7 @@ exu_output ex_comb(cpu_state* pcpu, idu_output idu_out)
                 exu_reg.dnpc != idu_out.snpc;  // if jump taken, dnpc != snpc
             break;
         case ECALL:  // TODO: ECALL handling
-            color_print("ECALL at PC = 0x%8.8x, Stop now.\n", idu_out.pc);
+            color_print("ECALL at PC = 0x%8.8x, but myCpu don't stop now.\n", idu_out.pc);
             // exit(_ecall_checker(pcpu));
             exu_reg.valid = 0;  // just for test, pipeline will go on
             break;
