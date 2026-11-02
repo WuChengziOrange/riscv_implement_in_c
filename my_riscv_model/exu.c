@@ -37,9 +37,9 @@ exu_output ex_comb(cpu_state* pcpu, idu_output idu_out)
         /* not valid quick return */
         return exu_reg;
     }
-    color_print("\r\nMyRisc EX: 0x%8.8x at PC=0x%8.8x",
-                idu_out._inst,
-                exu_reg.pc);
+    // color_print("\r\nMyRisc EX: 0x%8.8x at PC=0x%8.8x",
+    //             idu_out._inst,
+    //             exu_reg.pc);
 
     switch (idu_out.alu_op) {
         case ADD:
