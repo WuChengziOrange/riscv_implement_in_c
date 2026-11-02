@@ -32,5 +32,5 @@ SECTIONS
         __bss_end = .;
     } > RAM
 
-    ASSERT(. <= _stack_top, "firmware size exceeds RAM size");
+    ASSERT(. <= _stack_top, "firmware size exceeds RAM size")
 }
