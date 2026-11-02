@@ -86,7 +86,7 @@ peripheral_t peripheral_list[] = {
     },
     {
         .pool = seven_seg_pool,
-        .base_addr = 0,
+        .base_addr = 0xfffff000,
         .len = 4,
         .callback_r = ram_read, /* now just treat as ram */
         .callback_w = ram_write,
