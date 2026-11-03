@@ -3,9 +3,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#define CYCLE_LIMIT 1000000
 int main(int argc, char *argv[])
 {
     const char* binpath = EMU_BIN_PATH;
+    int i = 0;
     if (argc != 2)
     {
         fprintf(stderr, "Usage: %s <program-file>\n", argv[0]);
@@ -18,7 +20,8 @@ int main(int argc, char *argv[])
     WB_info golden = {0};
     wbu_output my_out = {0};
     printf("[difftest] Test Start!\n");
-    for (int i = 0; i < 1000000; i++) {
+
+    for (i = 0; i < CYCLE_LIMIT; i++) {
         for (int j = 0; j < 100; j++) {
             golden = cpu_run_once();
             if (golden.wb_have_inst) {
@@ -52,6 +55,6 @@ int main(int argc, char *argv[])
             return -1;
         }
     }
-    printf("Timed out! Please check whether your CPU got stuck.\n");
+    printf("Timed out! Please check whether your CPU got stuck.%d >= %d\n",i, CYCLE_LIMIT);
     return 0;
 }

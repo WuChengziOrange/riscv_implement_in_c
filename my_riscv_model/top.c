@@ -24,7 +24,7 @@ static cpu_state cpu = {.regs = &regs};
 uint32_t gpr_read(cpu_state* pcpu, uint32_t r)
 {
     pipeline_reg* reg = pcpu->regs;
-    if (reg->mem_wb.reg_write_en) {
+    if (reg->mem_wb.reg_write_en && reg->mem_wb.valid) {
         /* in this case wb state is writing register file */
         if ((reg->mem_wb.rd == r) && r) {
             return reg->mem_wb.rd_val;

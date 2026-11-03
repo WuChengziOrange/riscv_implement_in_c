@@ -1,27 +1,27 @@
+#include <stdio.h>
 #include <stdint.h>
-typedef struct {
-    volatile uint32_t tx;
-    volatile uint32_t rx;
-} uart_t;
-
-uart_t* uart0 = (uart_t*)0x80000000;
 
 uint32_t data[10];
+
 int main(void)
 {
-    char str[] = "\r\ngood evening\r\n";
+    /* 不需要缓冲：64K RAM 下省掉 1KB 的 stdio buffer，也省掉一次 malloc */
+    setvbuf(stdout, NULL, _IONBF, 0);
+
     uint32_t a = 0x12345678;
     uint32_t b = 0x87654321;
-    uint32_t c = a + b;
-    uint32_t d = a - b;
-    uint32_t e = a & b;
-    uint32_t f = a | b;
-    data[0] = c;
-    data[1] = d;
-    data[2] = e;
-    data[3] = f;
-    for(uint32_t i = 0; i < sizeof(str); i++) {
-        uart0->tx = (uint32_t)str[i];
-    }
+
+    printf("\r\n=== hello newlib-nano ===\r\n");
+    printf("a = 0x%08x (%u)\r\n", (unsigned)a, (unsigned)a);
+    printf("b = 0x%08x (%u)\r\n", (unsigned)b, (unsigned)b);
+    printf("a+b = 0x%08x\r\n", (unsigned)(a + b));
+    printf("a-b = 0x%08x\r\n", (unsigned)(a - b));
+    printf("a&b = 0x%08x\r\n", (unsigned)(a & b));
+    printf("a|b = 0x%08x\r\n", (unsigned)(a | b));
+    printf("pointer of data = %p\r\n", (void *)data);
+
+    data[0] = a + b;
+    printf("data[0] = %u\r\n", (unsigned)data[0]);
+
     return 0;
 }
